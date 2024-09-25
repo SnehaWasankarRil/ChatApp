@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+</head>
+<body>
+    <h1>Chatting</h1>
+
+    <!-- Broadcasting -->
+    <h2>Broadcast a Message</h2>
+    <input type="text" id="broadcastMessage" placeholder="Enter Broadcast Message" />
+    <button id="broadcastBtn">Send Broadcast</button>
+
+    <!-- Private messages -->
+    <h2>Send a Private Message</h2>
+    <input type="text" id="privateMessage" placeholder="Enter Private Message" />
+    <input type="text" id="recipientId" placeholder="Recipient Socket ID" />
+    <button id="privateBtn">Send Private Message</button>
+
+    <!-- Rooms -->
+    <h2>Rooms (Groups)</h2>
+    <input type="text" id="room" placeholder="Enter Room Name" />
+    <button id="joinRoomBtn">Join Room</button>
+    <input type="text" id="roomMessage" placeholder="Enter Room Message" />
+    <button id="roomBtn">Send Room Message</button>
+
+    <div id="messages"></div>
+
+    <!-- <button onclick="createConnection()">Create web-socket connection</button> -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // function createConnection() {
+        //     const socket = io();
+        // }       
+        const socket = io();
+        const allMessages = document.getElementById('messages')
+        
+        socket.on("message", (message) => {
+            // console.log(message)
+            const p = document.createElement("p");
+            p.innerText = message;
+            allMessages.appendChild(p);
+        })
+
+        // send a message to everyone
+        const broadcastBtn = document.getElementById('broadcastBtn');
+        broadcastBtn.addEventListener('click', () => {
+            const message = document.getElementById('broadcastMessage').value;
+            socket.emit('user-message', message);  // send to everyone
+        });
+
+        // Send a private message to a specific user
+        const privateBtn = document.getElementById('privateBtn');
+        privateBtn.addEventListener('click', () => {
+            const message = document.getElementById('privateMessage').value;
+            const recipientId = document.getElementById('recipientId').value;
+            socket.emit('private-message', { recipientId, message });  // Private message
+        });
+
+        // Join a room
+        const joinRoomBtn = document.getElementById('joinRoomBtn');
+        joinRoomBtn.addEventListener('click', () => {
+            const room = document.getElementById('room').value;
+            socket.emit('join-room', room);  // Join a room
+        });
+
+        // Send a message to a specific room
+        const roomBtn = document.getElementById('roomBtn');
+        roomBtn.addEventListener('click', () => {
+            const message = document.getElementById('roomMessage').value;
+            const room = document.getElementById('room').value;
+            socket.emit('room-message', { room, message });  // Send to a specific room
+        });
+    </script>
+</body>
+</html>
